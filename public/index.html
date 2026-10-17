@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mading Digital Sekolah</title>
+  <title>Mading Digital Pondok</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
   <!-- NAVBAR -->
   <nav class="navbar">
     <div class="nav-brand">
-      <h1>Mading Digital</h1>
+      <h1>Mading Digital Pondok</h1>
     </div>
 
     <!-- Menu Saat Belum Login -->
@@ -22,7 +22,7 @@
 
     <!-- Menu Saat Sudah Login -->
     <div id="user-nav" class="nav-user hidden">
-      <span id="user-role-badge" class="badge">SISWA</span>
+      <span id="user-role-badge" class="badge">SANTRI</span>
       <span id="user-name-display" style="font-weight: 600;">Nama User</span>
       <a id="btn-admin-panel" href="/admin.html" class="btn btn-outline hidden">Panel Admin</a>
       <button id="btn-logout" class="btn btn-outline">Keluar</button>
@@ -32,7 +32,7 @@
   <!-- KONTEN UTAMA -->
   <main class="container">
 
-    <!-- Status Box (Muncul jika Siswa ingin Request Role Guru) -->
+    <!-- Status Box (Request Role Guru/Ustadz) -->
     <div id="status-box-container" class="hidden"></div>
 
     <!-- Header Actions & Search -->
@@ -43,17 +43,16 @@
 
     <!-- Grid Postingan Mading -->
     <div class="mading-grid" id="mading-grid">
-      <!-- Card Contoh / Dummy -->
       <div class="post-card">
         <div>
           <div class="post-header">
             <span class="post-category">PENGUMUMAN</span>
           </div>
-          <h3 class="post-title">Selamat Datang di Mading Digital!</h3>
-          <p class="post-content">Platform mading digital sekolah untuk berbagi informasi, karya tulis, dan pengumuman kegiatan siswa maupun guru.</p>
+          <h3 class="post-title">Selamat Datang di Mading Digital Pondok!</h3>
+          <p class="post-content">Platform mading digital untuk berbagi informasi, artikel, karya santri, dan pengumuman pondok.</p>
         </div>
         <div class="post-footer">
-          <span>Oleh: Admin Sekolah</span>
+          <span>Oleh: Admin Pondok</span>
           <span>Hari ini</span>
         </div>
       </div>
@@ -66,8 +65,8 @@
       <h2>Masuk ke Akun</h2>
       <form id="form-login">
         <div class="form-group">
-          <label for="login-email">Email</label>
-          <input type="email" id="login-email" required placeholder="nama@sekolah.sch.id">
+          <label for="login-username">Username / ID Santri</label>
+          <input type="text" id="login-username" required placeholder="Masukkan username">
         </div>
         <div class="form-group">
           <label for="login-password">Password</label>
@@ -91,11 +90,11 @@
       <form id="form-register">
         <div class="form-group">
           <label for="reg-name">Nama Lengkap</label>
-          <input type="text" id="reg-name" required placeholder="Nama Anda">
+          <input type="text" id="reg-name" required placeholder="Nama Lengkap Santri">
         </div>
         <div class="form-group">
-          <label for="reg-email">Email</label>
-          <input type="email" id="reg-email" required placeholder="nama@sekolah.sch.id">
+          <label for="reg-username">Username / ID Santri</label>
+          <input type="text" id="reg-username" required placeholder="Buat username unik">
         </div>
         <div class="form-group">
           <label for="reg-password">Password</label>
