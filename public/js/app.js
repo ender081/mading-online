@@ -29,11 +29,9 @@ async function checkSession() {
 
 // --- SETUP EVENT LISTENERS ---
 function setupEventListeners() {
-  // Tombol Modal Login/Register
   document.getElementById("btn-show-login")?.addEventListener("click", () => showModal("modal-login"));
   document.getElementById("btn-show-register")?.addEventListener("click", () => showModal("modal-register"));
   
-  // Toggle Switch antara Login dan Register
   document.getElementById("link-to-register")?.addEventListener("click", (e) => {
     e.preventDefault();
     hideModal("modal-login");
@@ -45,7 +43,6 @@ function setupEventListeners() {
     showModal("modal-login");
   });
 
-  // Close Modals
   document.querySelectorAll(".btn-close-modal").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const modal = e.target.closest(".modal-overlay");
@@ -53,31 +50,23 @@ function setupEventListeners() {
     });
   });
 
-  // Submit Form Login
   document.getElementById("form-login")?.addEventListener("submit", handleLogin);
-
-  // Submit Form Register
   document.getElementById("form-register")?.addEventListener("submit", handleRegister);
-
-  // Logout
   document.getElementById("btn-logout")?.addEventListener("click", handleLogout);
-
-  // Request Role Guru
-  document.getElementById("btn-request-guru")?.addEventListener("click", handleRequestGuru);
 }
 
 // --- PEMROSESAN AUTHENTICATION ---
 
 async function handleLogin(e) {
   e.preventDefault();
-  const email = document.getElementById("login-email").value;
+  const username = document.getElementById("login-username").value;
   const password = document.getElementById("login-password").value;
 
   try {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ username, password })
     });
 
     const data = await res.json();
@@ -97,14 +86,14 @@ async function handleLogin(e) {
 async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById("reg-name").value;
-  const email = document.getElementById("reg-email").value;
+  const username = document.getElementById("reg-username").value;
   const password = document.getElementById("reg-password").value;
 
   try {
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password })
+      body: JSON.stringify({ name, username, password })
     });
 
     const data = await res.json();
@@ -128,7 +117,7 @@ async function handleLogout() {
 }
 
 async function handleRequestGuru() {
-  if (!confirm("Ajukan permintaan status Guru ke Admin?")) return;
+  if (!confirm("Ajukan permintaan status Guru/Ustadz ke Admin?")) return;
 
   try {
     const res = await fetch("/api/user/request-guru", { method: "POST" });
@@ -157,7 +146,6 @@ function updateUIForLoggedInUser() {
     roleBadge.className = `badge badge-${currentUser.role}`;
   }
 
-  // Jika user adalah Admin, tampilkan tombol ke Halaman Admin
   if (currentUser.role === "admin") {
     document.getElementById("btn-admin-panel")?.classList.remove("hidden");
   } else {
@@ -182,22 +170,21 @@ function renderRoleRequestStatus() {
     if (currentUser.role_request === "requested_guru") {
       container.innerHTML = `
         <div class="status-box">
-          <span> Permintaan Anda menjadi <strong>Guru</strong> sedang menunggu persetujuan Admin.</span>
+          <span> Permintaan Anda menjadi <strong>Guru/Ustadz</strong> sedang menunggu persetujuan Admin.</span>
         </div>`;
     } else {
       container.innerHTML = `
         <div class="status-box">
-          <span>Anda terdaftar sebagai <strong>Siswa</strong>. Apakah Anda seorang Guru?</span>
-          <button id="btn-request-guru" class="btn btn-warning">Minta Akses Guru</button>
+          <span>Anda terdaftar sebagai <strong>Santri/Siswa</strong>. Apakah Anda seorang Ustadz/Guru?</span>
+          <button id="btn-request-guru-btn" class="btn btn-warning">Minta Akses Guru</button>
         </div>`;
-      document.getElementById("btn-request-guru")?.addEventListener("click", handleRequestGuru);
+      document.getElementById("btn-request-guru-btn")?.addEventListener("click", handleRequestGuru);
     }
   } else {
     container.classList.add("hidden");
   }
 }
 
-// --- UTILS ---
 function showModal(id) {
   document.getElementById(id)?.classList.remove("hidden");
 }
