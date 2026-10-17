@@ -14,13 +14,11 @@
       <h1>Mading Digital Pondok</h1>
     </div>
 
-    <!-- Menu Saat Belum Login -->
     <div id="guest-nav" class="nav-user">
       <button id="btn-show-login" class="btn btn-outline">Masuk</button>
       <button id="btn-show-register" class="btn btn-primary">Daftar</button>
     </div>
 
-    <!-- Menu Saat Sudah Login -->
     <div id="user-nav" class="nav-user hidden">
       <span id="user-role-badge" class="badge">SANTRI</span>
       <span id="user-name-display" style="font-weight: 600;">Nama User</span>
@@ -32,32 +30,47 @@
   <!-- KONTEN UTAMA -->
   <main class="container">
 
-    <!-- Status Box (Request Role Guru/Ustadz) -->
     <div id="status-box-container" class="hidden"></div>
 
-    <!-- Header Actions & Search -->
     <div class="dashboard-actions">
-      <h2>Postingan Terbaru</h2>
+      <h2>Postingan Mading</h2>
       <button id="btn-create-post" class="btn btn-primary hidden">+ Buat Postingan</button>
     </div>
 
-    <!-- Grid Postingan Mading -->
     <div class="mading-grid" id="mading-grid">
-      <div class="post-card">
-        <div>
-          <div class="post-header">
-            <span class="post-category">PENGUMUMAN</span>
-          </div>
-          <h3 class="post-title">Selamat Datang di Mading Digital Pondok!</h3>
-          <p class="post-content">Platform mading digital untuk berbagi informasi, artikel, karya santri, dan pengumuman pondok.</p>
-        </div>
-        <div class="post-footer">
-          <span>Oleh: Admin Pondok</span>
-          <span>Hari ini</span>
-        </div>
-      </div>
+      <!-- Postingan dimuat lewat JavaScript -->
     </div>
   </main>
+
+  <!-- MODAL BUAT POSTINGAN -->
+  <div id="modal-create-post" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Tulis Postingan Baru</h2>
+      <form id="form-create-post">
+        <div class="form-group">
+          <label for="post-title">Judul Postingan</label>
+          <input type="text" id="post-title" required placeholder="Contoh: Jadwal Kajian Rutin">
+        </div>
+        <div class="form-group">
+          <label for="post-category">Kategori</label>
+          <select id="post-category" required>
+            <option value="PENGUMUMAN">Pengumuman</option>
+            <option value="ARTIKEL">Artikel & Opini</option>
+            <option value="KARYA SANTRI">Karya Santri / Puisi</option>
+            <option value="KEGIATAN">Jadwal & Kegiatan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="post-content">Isi Postingan</label>
+          <textarea id="post-content" rows="5" required placeholder="Tuliskan isi informasi di sini..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-close-modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Terbitkan</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- MODAL LOGIN -->
   <div id="modal-login" class="modal-overlay hidden">
