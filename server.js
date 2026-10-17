@@ -17,38 +17,50 @@ app.use(session({
   saveUninitialized: false
 }));
 
-// Inisialisasi Database SQLite
+// Database SQLite
 const db = new sqlite3.Database('./database.sqlite', (err) => {
   if (err) console.error("Gagal koneksi DB:", err);
   else console.log("Database SQLite terhubung.");
 });
 
-// Membuat Tabel User jika belum ada
+// Inisialisasi Tabel Users & Posts
 db.serialize(() => {
+  // Tabel Users
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
-      role TEXT DEFAULT 'siswa', -- 'siswa', 'guru', 'admin'
-      role_request TEXT DEFAULT 'none' -- 'none', 'requested_guru', 'approved'
+      role TEXT DEFAULT 'siswa',
+      role_request TEXT DEFAULT 'none'
     )
   `);
 
-  // Bikin Akun Admin Default otomatis jika belum ada
+  // Tabel Posts
+  db.run(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      category TEXT NOT NULL,
+      content TEXT NOT NULL,
+      author_name TEXT NOT NULL,
+      user_id INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Akun Admin Default
   db.get("SELECT * FROM users WHERE role = 'admin'", [], (err, row) => {
     if (!row) {
       const hash = bcrypt.hashSync("admin123", 10);
       db.run("INSERT INTO users (name, username, password, role, role_request) VALUES (?, ?, ?, ?, ?)",
         ["Administrator Mading", "admin", hash, "admin", "none"]
       );
-      console.log("-> Akun Admin Default dibuat: Username: admin / Password: admin123");
     }
   });
 });
 
-// Middleware Cek Role Admin
 function requireAdmin(req, res, next) {
   if (req.session.user && req.session.user.role === 'admin') {
     next();
@@ -59,7 +71,6 @@ function requireAdmin(req, res, next) {
 
 // --- API AUTHENTICATION ---
 
-// Cek Sesi Aktif User
 app.get('/api/user/session', (req, res) => {
   if (req.session.user) {
     res.json({ success: true, user: req.session.user });
@@ -68,7 +79,6 @@ app.get('/api/user/session', (req, res) => {
   }
 });
 
-// 1. Registrasi Akun Santri/Siswa
 app.post('/api/register', (req, res) => {
   const { name, username, password } = req.body;
   const hash = bcrypt.hashSync(password, 10);
@@ -82,7 +92,6 @@ app.post('/api/register', (req, res) => {
   );
 });
 
-// 2. Login dengan Username
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
@@ -102,29 +111,58 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// 3. Request Role Guru/Ustadz
 app.post('/api/user/request-guru', (req, res) => {
   if (!req.session.user) return res.status(401).json({ success: false, message: "Belum login!" });
 
   const userId = req.session.user.id;
   db.run("UPDATE users SET role_request = 'requested_guru' WHERE id = ?", [userId], function(err) {
     if (err) return res.status(500).json({ success: false, message: "Gagal mengajukan permintaan." });
-    
     req.session.user.role_request = 'requested_guru';
     res.json({ success: true, message: "Permintaan role Guru berhasil dikirim ke Admin!" });
   });
 });
 
-// --- API KHUSUS ADMIN ---
+// --- API POSTINGAN MADING ---
 
-// 4. Admin melihat daftar pengajuan role Guru
+// Get Semua Postingan
+app.get('/api/posts', (req, res) => {
+  db.all("SELECT * FROM posts ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ success: false, message: "Gagal mengambil postingan." });
+    res.json({ success: true, posts: rows });
+  });
+});
+
+// Buat Postingan Baru (Hanya untuk pengguna yang sudah login)
+app.post('/api/posts', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: "Silakan login terlebih dahulu!" });
+  }
+
+  const { title, category, content } = req.body;
+  const authorName = req.session.user.name;
+  const userId = req.session.user.id;
+
+  if (!title || !category || !content) {
+    return res.status(400).json({ success: false, message: "Semua kolom wajib diisi!" });
+  }
+
+  db.run("INSERT INTO posts (title, category, content, author_name, user_id) VALUES (?, ?, ?, ?, ?)",
+    [title, category, content, authorName, userId],
+    function(err) {
+      if (err) return res.status(500).json({ success: false, message: "Gagal menyimpan postingan." });
+      res.json({ success: true, message: "Postingan berhasil diterbitkan!" });
+    }
+  );
+});
+
+// --- API ADMIN ---
+
 app.get('/api/admin/requests', requireAdmin, (req, res) => {
   db.all("SELECT id, name, username, role, role_request FROM users WHERE role_request = 'requested_guru'", [], (err, rows) => {
     res.json({ success: true, requests: rows });
   });
 });
 
-// 5. Admin Approve / Reject Role Guru
 app.post('/api/admin/approve-guru', requireAdmin, (req, res) => {
   const { userId, action } = req.body;
 
@@ -140,7 +178,6 @@ app.post('/api/admin/approve-guru', requireAdmin, (req, res) => {
   }
 });
 
-// Logout
 app.post('/api/logout', (req, res) => {
   req.session.destroy();
   res.json({ success: true, message: "Logout berhasil." });
