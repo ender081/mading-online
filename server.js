@@ -23,13 +23,13 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
   else console.log("Database SQLite terhubung.");
 });
 
-// Membuat Tabel User dan Postingan jika belum ada
+// Membuat Tabel User jika belum ada
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
+      username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       role TEXT DEFAULT 'siswa', -- 'siswa', 'guru', 'admin'
       role_request TEXT DEFAULT 'none' -- 'none', 'requested_guru', 'approved'
@@ -40,10 +40,10 @@ db.serialize(() => {
   db.get("SELECT * FROM users WHERE role = 'admin'", [], (err, row) => {
     if (!row) {
       const hash = bcrypt.hashSync("admin123", 10);
-      db.run("INSERT INTO users (name, email, password, role, role_request) VALUES (?, ?, ?, ?, ?)",
-        ["Administrator Mading", "admin@sekolah.sch.id", hash, "admin", "none"]
+      db.run("INSERT INTO users (name, username, password, role, role_request) VALUES (?, ?, ?, ?, ?)",
+        ["Administrator Mading", "admin", hash, "admin", "none"]
       );
-      console.log("-> Akun Admin Default dibuat: admin@sekolah.sch.id / admin123");
+      console.log("-> Akun Admin Default dibuat: Username: admin / Password: admin123");
     }
   });
 });
@@ -59,32 +59,41 @@ function requireAdmin(req, res, next) {
 
 // --- API AUTHENTICATION ---
 
-// 1. Registrasi Akun Siswa/Pengguna
+// Cek Sesi Aktif User
+app.get('/api/user/session', (req, res) => {
+  if (req.session.user) {
+    res.json({ success: true, user: req.session.user });
+  } else {
+    res.json({ success: true, user: null });
+  }
+});
+
+// 1. Registrasi Akun Santri/Siswa
 app.post('/api/register', (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, username, password } = req.body;
   const hash = bcrypt.hashSync(password, 10);
 
-  db.run("INSERT INTO users (name, email, password, role, role_request) VALUES (?, ?, ?, 'siswa', 'none')", 
-    [name, email, hash], 
+  db.run("INSERT INTO users (name, username, password, role, role_request) VALUES (?, ?, ?, 'siswa', 'none')", 
+    [name, username, hash], 
     function(err) {
-      if (err) return res.status(400).json({ success: false, message: "Email sudah terdaftar!" });
-      res.json({ success: true, message: "Registrasi berhasil, silakan login." });
+      if (err) return res.status(400).json({ success: false, message: "Username sudah terdaftar!" });
+      res.json({ success: true, message: "Pendaftaran berhasil, silakan masuk." });
     }
   );
 });
 
-// 2. Login
+// 2. Login dengan Username
 app.post('/api/login', (req, res) => {
-  const { email, password } = req.body;
-  db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
+  const { username, password } = req.body;
+  db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
     if (!user || !bcrypt.compareSync(password, user.password)) {
-      return res.status(401).json({ success: false, message: "Email atau password salah!" });
+      return res.status(401).json({ success: false, message: "Username atau password salah!" });
     }
 
     req.session.user = {
       id: user.id,
       name: user.name,
-      email: user.email,
+      username: user.username,
       role: user.role,
       role_request: user.role_request
     };
@@ -93,7 +102,7 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// 3. Request Role Guru (Diajukan oleh User/Siswa ke Admin)
+// 3. Request Role Guru/Ustadz
 app.post('/api/user/request-guru', (req, res) => {
   if (!req.session.user) return res.status(401).json({ success: false, message: "Belum login!" });
 
@@ -110,19 +119,19 @@ app.post('/api/user/request-guru', (req, res) => {
 
 // 4. Admin melihat daftar pengajuan role Guru
 app.get('/api/admin/requests', requireAdmin, (req, res) => {
-  db.all("SELECT id, name, email, role, role_request FROM users WHERE role_request = 'requested_guru'", [], (err, rows) => {
+  db.all("SELECT id, name, username, role, role_request FROM users WHERE role_request = 'requested_guru'", [], (err, rows) => {
     res.json({ success: true, requests: rows });
   });
 });
 
-// 5. Admin Menyetujui (Approve) atau Menolak (Reject) Role Guru
+// 5. Admin Approve / Reject Role Guru
 app.post('/api/admin/approve-guru', requireAdmin, (req, res) => {
-  const { userId, action } = req.body; // action: 'approve' atau 'reject'
+  const { userId, action } = req.body;
 
   if (action === 'approve') {
     db.run("UPDATE users SET role = 'guru', role_request = 'none' WHERE id = ?", [userId], function(err) {
       if (err) return res.status(500).json({ success: false, message: "Gagal update role." });
-      res.json({ success: true, message: "User berhasil diubah menjadi Guru!" });
+      res.json({ success: true, message: "Pengguna berhasil diubah menjadi Guru/Ustadz!" });
     });
   } else {
     db.run("UPDATE users SET role_request = 'none' WHERE id = ?", [userId], function(err) {
