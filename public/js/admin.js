@@ -1,9 +1,7 @@
-// Memuat daftar pengajuan role saat halaman admin dimuat
 document.addEventListener("DOMContentLoaded", () => {
   loadGuruRequests();
 });
 
-// Mengambil daftar siswa yang meminta role Guru dari API backend
 async function loadGuruRequests() {
   try {
     const res = await fetch("/api/admin/requests");
@@ -34,7 +32,7 @@ async function loadGuruRequests() {
       tbody.innerHTML += `
         <tr>
           <td><strong>${escapeHtml(req.name)}</strong></td>
-          <td>${escapeHtml(req.email)}</td>
+          <td>${escapeHtml(req.username)}</td>
           <td>
             <button class="btn-approve" onclick="handleApprove(${req.id}, 'approve')">Setujui</button>
             <button class="btn-reject" onclick="handleApprove(${req.id}, 'reject')">Tolak</button>
@@ -47,10 +45,9 @@ async function loadGuruRequests() {
   }
 }
 
-// Menangani aksi Setujui (Approve) atau Tolak (Reject) dari Admin
 async function handleApprove(userId, action) {
   const confirmText = action === 'approve' 
-    ? "Setujui pengguna ini menjadi Guru?" 
+    ? "Setujui pengguna ini menjadi Guru/Ustadz?" 
     : "Tolak pengajuan role Guru ini?";
 
   if (!confirm(confirmText)) return;
@@ -65,14 +62,12 @@ async function handleApprove(userId, action) {
     const data = await res.json();
     alert(data.message);
     
-    // Muat ulang tabel setelah perubahan disimpan
     loadGuruRequests();
   } catch (err) {
     alert("Terjadi kesalahan saat memproses permintaan.");
   }
 }
 
-// Helper untuk mencegah karakter HTML berbahaya (XSS Protection)
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
