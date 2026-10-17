@@ -1,13 +1,11 @@
-// --- STATE LOKAL APLIKASI ---
 let currentUser = null;
 
-// --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
   checkSession();
+  loadPosts();
   setupEventListeners();
 });
 
-// --- CEK SESI LOGIN DARI BACKEND ---
 async function checkSession() {
   try {
     const response = await fetch("/api/user/session");
@@ -27,10 +25,10 @@ async function checkSession() {
   }
 }
 
-// --- SETUP EVENT LISTENERS ---
 function setupEventListeners() {
   document.getElementById("btn-show-login")?.addEventListener("click", () => showModal("modal-login"));
   document.getElementById("btn-show-register")?.addEventListener("click", () => showModal("modal-register"));
+  document.getElementById("btn-create-post")?.addEventListener("click", () => showModal("modal-create-post"));
   
   document.getElementById("link-to-register")?.addEventListener("click", (e) => {
     e.preventDefault();
@@ -52,11 +50,75 @@ function setupEventListeners() {
 
   document.getElementById("form-login")?.addEventListener("submit", handleLogin);
   document.getElementById("form-register")?.addEventListener("submit", handleRegister);
+  document.getElementById("form-create-post")?.addEventListener("submit", handleCreatePost);
   document.getElementById("btn-logout")?.addEventListener("click", handleLogout);
 }
 
-// --- PEMROSESAN AUTHENTICATION ---
+// --- AMBIL SEMUA POSTINGAN ---
+async function loadPosts() {
+  const grid = document.getElementById("mading-grid");
+  if (!grid) return;
 
+  try {
+    const res = await fetch("/api/posts");
+    const data = await res.json();
+
+    if (data.success && data.posts.length > 0) {
+      grid.innerHTML = "";
+      data.posts.forEach(post => {
+        grid.innerHTML += `
+          <div class="post-card">
+            <div>
+              <div class="post-header">
+                <span class="post-category">${escapeHtml(post.category)}</span>
+              </div>
+              <h3 class="post-title">${escapeHtml(post.title)}</h3>
+              <p class="post-content">${escapeHtml(post.content)}</p>
+            </div>
+            <div class="post-footer">
+              <span>Oleh: ${escapeHtml(post.author_name)}</span>
+              <span>${new Date(post.created_at).toLocaleDateString('id-ID')}</span>
+            </div>
+          </div>
+        `;
+      });
+    } else {
+      grid.innerHTML = `<p style="color: #64748b; grid-column: 1/-1; text-align: center;">Belum ada postingan mading.</p>`;
+    }
+  } catch (err) {
+    console.error("Gagal memuat postingan:", err);
+  }
+}
+
+// --- BUAT POSTINGAN BARU ---
+async function handleCreatePost(e) {
+  e.preventDefault();
+  const title = document.getElementById("post-title").value;
+  const category = document.getElementById("post-category").value;
+  const content = document.getElementById("post-content").value;
+
+  try {
+    const res = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, category, content })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("Postingan berhasil diterbitkan!");
+      document.getElementById("form-create-post").reset();
+      hideModal("modal-create-post");
+      loadPosts(); // Reload mading
+    } else {
+      alert(data.message || "Gagal membuat postingan.");
+    }
+  } catch (err) {
+    alert("Terjadi kesalahan jaringan.");
+  }
+}
+
+// --- AUTHENTICATION & UI ---
 async function handleLogin(e) {
   e.preventDefault();
   const username = document.getElementById("login-username").value;
@@ -113,6 +175,7 @@ async function handleLogout() {
   await fetch("/api/logout", { method: "POST" });
   currentUser = null;
   updateUIForGuest();
+  loadPosts();
   alert("Anda telah logout.");
 }
 
@@ -132,11 +195,10 @@ async function handleRequestGuru() {
   }
 }
 
-// --- UPDATE TAMPILAN INTERFACE (UI) ---
-
 function updateUIForLoggedInUser() {
   document.getElementById("guest-nav")?.classList.add("hidden");
   document.getElementById("user-nav")?.classList.remove("hidden");
+  document.getElementById("btn-create-post")?.classList.remove("hidden");
 
   document.getElementById("user-name-display").textContent = currentUser.name;
   
@@ -158,6 +220,7 @@ function updateUIForLoggedInUser() {
 function updateUIForGuest() {
   document.getElementById("guest-nav")?.classList.remove("hidden");
   document.getElementById("user-nav")?.classList.add("hidden");
+  document.getElementById("btn-create-post")?.classList.add("hidden");
   document.getElementById("status-box-container")?.classList.add("hidden");
 }
 
@@ -191,4 +254,12 @@ function showModal(id) {
 
 function hideModal(id) {
   document.getElementById(id)?.classList.add("hidden");
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
