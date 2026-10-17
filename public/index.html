@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mading Digital Sekolah</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <h1>Mading Digital</h1>
+    </div>
+
+    <!-- Menu Saat Belum Login -->
+    <div id="guest-nav" class="nav-user">
+      <button id="btn-show-login" class="btn btn-outline">Masuk</button>
+      <button id="btn-show-register" class="btn btn-primary">Daftar</button>
+    </div>
+
+    <!-- Menu Saat Sudah Login -->
+    <div id="user-nav" class="nav-user hidden">
+      <span id="user-role-badge" class="badge">SISWA</span>
+      <span id="user-name-display" style="font-weight: 600;">Nama User</span>
+      <a id="btn-admin-panel" href="/admin.html" class="btn btn-outline hidden">Panel Admin</a>
+      <button id="btn-logout" class="btn btn-outline">Keluar</button>
+    </div>
+  </nav>
+
+  <!-- KONTEN UTAMA -->
+  <main class="container">
+
+    <!-- Status Box (Muncul jika Siswa ingin Request Role Guru) -->
+    <div id="status-box-container" class="hidden"></div>
+
+    <!-- Header Actions & Search -->
+    <div class="dashboard-actions">
+      <h2>Postingan Terbaru</h2>
+      <button id="btn-create-post" class="btn btn-primary hidden">+ Buat Postingan</button>
+    </div>
+
+    <!-- Grid Postingan Mading -->
+    <div class="mading-grid" id="mading-grid">
+      <!-- Card Contoh / Dummy -->
+      <div class="post-card">
+        <div>
+          <div class="post-header">
+            <span class="post-category">PENGUMUMAN</span>
+          </div>
+          <h3 class="post-title">Selamat Datang di Mading Digital!</h3>
+          <p class="post-content">Platform mading digital sekolah untuk berbagi informasi, karya tulis, dan pengumuman kegiatan siswa maupun guru.</p>
+        </div>
+        <div class="post-footer">
+          <span>Oleh: Admin Sekolah</span>
+          <span>Hari ini</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL LOGIN -->
+  <div id="modal-login" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Masuk ke Akun</h2>
+      <form id="form-login">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" required placeholder="nama@sekolah.sch.id">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-close-modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Masuk</button>
+        </div>
+      </form>
+      <div class="auth-toggle">
+        Belum punya akun? <a href="#" id="link-to-register">Daftar di sini</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL REGISTER -->
+  <div id="modal-register" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Buat Akun Baru</h2>
+      <form id="form-register">
+        <div class="form-group">
+          <label for="reg-name">Nama Lengkap</label>
+          <input type="text" id="reg-name" required placeholder="Nama Anda">
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" required placeholder="nama@sekolah.sch.id">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" required placeholder="••••••••">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-close-modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Daftar</button>
+        </div>
+      </form>
+      <div class="auth-toggle">
+        Sudah punya akun? <a href="#" id="link-to-login">Masuk di sini</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Approval Panel - Mading</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f4f6f8; }
+    .card { background: white; padding: 1.5rem; border-radius: 8px; max-width: 600px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    .btn-approve { background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    .btn-reject { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Permintaan Role Guru</h2>
+    <p>Berikut daftar pengguna yang meminta persetujuan status Guru:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="request-list">
+        <!-- Data diisi otomatis lewat JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadRequests() {
+      const res = await fetch('/api/admin/requests');
+      const data = await res.json();
+      
+      if(!data.success) {
+        alert("Akses hanya untuk Admin!");
+        window.location.href = '/';
+        return;
+      }
+
+      const tbody = document.getElementById('request-list');
+      tbody.innerHTML = '';
+
+      if (data.requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada pengajuan.</td></tr>';
+        return;
+      }
+
+      data.requests.forEach(req => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${req.name}</td>
+            <td>${req.email}</td>
+            <td>
+              <button class="btn-approve" onclick="handleApprove(${req.id}, 'approve')">Setujui</button>
+              <button class="btn-reject" onclick="handleApprove(${req.id}, 'reject')">Tolak</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    async function handleApprove(userId, action) {
+      const res = await fetch('/api/admin/approve-guru', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action })
+      });
+      const data = await res.json();
+      alert(data.message);
+      loadRequests();
+    }
+
+    loadRequests();
+  </script>
+</body>
+</html>
