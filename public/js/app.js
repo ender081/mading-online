@@ -124,7 +124,6 @@ function renderPosts() {
       reportButton = `<button onclick="openReportModal(${post.id})" class="btn" style="background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 0.2rem 0.5rem; font-size: 0.75rem;">Laporkan</button>`;
     }
 
-    // Tombol Like
     const isLiked = post.is_liked > 0;
     const likeBtnStyle = isLiked 
       ? 'background-color: #2563eb; color: white; border: 1px solid #2563eb;' 
@@ -143,7 +142,8 @@ function renderPosts() {
           <div class="post-header">
             <span class="post-category">${escapeHtml(post.category)}</span>
           </div>
-          <h3 class="post-title">${escapeHtml(post.title)}</h3>${imageTag}
+          <h3 class="post-title">${escapeHtml(post.title)}</h3>
+          ${imageTag}
           <p class="post-content">${escapeHtml(post.content)}</p>
         </div>
         <div>
@@ -154,7 +154,8 @@ function renderPosts() {
           <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; justify-content: space-between; align-items: center;">
             <div>${likeButton}</div>
             <div style="display: flex; gap: 0.5rem;">
-              ${reportButton}${actionButtons}
+              ${reportButton}
+              ${actionButtons}
             </div>
           </div>
         </div>
@@ -163,7 +164,6 @@ function renderPosts() {
   });
 }
 
-// --- LOGIKA TOGGLE LIKE ---
 async function toggleLike(postId) {
   if (!currentUser) {
     alert("Silakan login terlebih dahulu untuk menyukai postingan!");
@@ -175,7 +175,7 @@ async function toggleLike(postId) {
     const res = await fetch(`/api/posts/${postId}/like`, { method: "POST" });
     const data = await res.json();
     if (data.success) {
-      loadPosts(); // Reload mading untuk update hitungan & status
+      loadPosts();
     } else {
       alert(data.message);
     }
@@ -184,7 +184,6 @@ async function toggleLike(postId) {
   }
 }
 
-// --- LOGIKA PELAPORAN POSTINGAN ---
 function openReportModal(postId) {
   if (!currentUser) {
     alert("Silakan login terlebih dahulu untuk melaporkan postingan!");
@@ -335,9 +334,9 @@ async function handleRegister(e) {
 
   let kelasString = "";
   if (tingkat >= 11) {
-    kelasString = `Kelas ${tingkat} ${jurusan}${subkelas}`;
+    kelasString = `Kelas ${tingkat} ${jurusan} ${subkelas}`;
   } else {
-    kelasString = `Kelas ${tingkat}${subkelas}`;
+    kelasString = `Kelas ${tingkat} ${subkelas}`;
   }
 
   try {
@@ -448,4 +447,34 @@ function renderRoleRequestStatus() {
     container.classList.remove("hidden");
     if (currentUser.role_request === "requested_guru") {
       container.innerHTML = `
-        <div classv
+        <div class="status-box">
+          <span> Permintaan Anda menjadi <strong>Guru/Ustadz</strong> sedang menunggu persetujuan Admin.</span>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div class="status-box">
+          <span>Anda terdaftar sebagai <strong>Santri/Siswa</strong>. Apakah Anda seorang Ustadz/Guru?</span>
+          <button id="btn-request-guru-btn" class="btn btn-warning">Minta Akses Guru</button>
+        </div>`;
+      document.getElementById("btn-request-guru-btn")?.addEventListener("click", handleRequestGuru);
+    }
+  } else {
+    container.classList.add("hidden");
+  }
+}
+
+function showModal(id) {
+  document.getElementById(id)?.classList.remove("hidden");
+}
+
+function hideModal(id) {
+  document.getElementById(id)?.classList.add("hidden");
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
