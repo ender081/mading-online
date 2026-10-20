@@ -2,79 +2,63 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Approval Panel - Mading</title>
+  <title>Admin Dashboard - Mading Pondok</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; background: #f4f6f8; }
-    .card { background: white; padding: 1.5rem; border-radius: 8px; max-width: 600px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    body { font-family: sans-serif; padding: 2rem; background: #f8fafc; color: #1e293b; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    h2 { margin-bottom: 1rem; color: #0f172a; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.875rem; }
     .btn-approve { background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     .btn-reject { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    .btn-delete { background: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    .btn-dismiss { background: #64748b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    .nav-back { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-weight: 500; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Permintaan Role Guru</h2>
-    <p>Berikut daftar pengguna yang meminta persetujuan status Guru:</p>
-    <table>
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>Email</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="request-list">
-        <!-- Data diisi otomatis lewat JS -->
-      </tbody>
-    </table>
+  <div class="container">
+    <a href="/" class="nav-back">← Kembali ke Mading</a>
+
+    <!-- TABEL 1: LAPORAN KONTEN BERMASALAH -->
+    <div class="card">
+      <h2 style="color: #dc2626;">⚠️ Laporan Konten Bermasalah</h2>
+      <p style="font-size: 0.875rem; color: #64748b;">Daftar postingan yang dilaporkan oleh santri/pengguna lain karena melanggar aturan.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Postingan</th>
+            <th>Pelapor</th>
+            <th>Alasan & Catatan</th>
+            <th>Aksi Admin</th>
+          </tr>
+        </thead>
+        <tbody id="report-list">
+          <!-- Data laporan diisi otomatis -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TABEL 2: PERMINTAAN ROLE GURU -->
+    <div class="card">
+      <h2>Permintaan Role Guru / Ustadz</h2>
+      <p style="font-size: 0.875rem; color: #64748b;">Pengajuan dari santri/pengguna yang meminta status akun Guru.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Username / Kelas</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="request-list">
+          <!-- Data pengajuan diisi otomatis -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <script>
-    async function loadRequests() {
-      const res = await fetch('/api/admin/requests');
-      const data = await res.json();
-      
-      if(!data.success) {
-        alert("Akses hanya untuk Admin!");
-        window.location.href = '/';
-        return;
-      }
-
-      const tbody = document.getElementById('request-list');
-      tbody.innerHTML = '';
-
-      if (data.requests.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada pengajuan.</td></tr>';
-        return;
-      }
-
-      data.requests.forEach(req => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${req.name}</td>
-            <td>${req.email}</td>
-            <td>
-              <button class="btn-approve" onclick="handleApprove(${req.id}, 'approve')">Setujui</button>
-              <button class="btn-reject" onclick="handleApprove(${req.id}, 'reject')">Tolak</button>
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    async function handleApprove(userId, action) {
-      const res = await fetch('/api/admin/approve-guru', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, action })
-      });
-      const data = await res.json();
-      alert(data.message);
-      loadRequests();
-    }
-
-    loadRequests();
-  </script>
+  <script src="/js/admin.js"></script>
 </body>
 </html>
