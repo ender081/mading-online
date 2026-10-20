@@ -1,7 +1,7 @@
 {
   "name": "mading-sekolah-online",
   "version": "1.0.0",
-  "description": "Web Mading Online untuk Sekolah dengan Fitur Request Role Guru & Admin Panel",
+  "description": "Web Mading Online untuk Pondok dengan Fitur Foto, Edit/Hapus, Kelas Dinamis, Like, dan Sistem Report",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -12,6 +12,7 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "multer": "^1.4.5-lts.1",
     "sqlite3": "^5.1.7"
   }
 }
