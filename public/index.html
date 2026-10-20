@@ -29,7 +29,6 @@
 
   <!-- KONTEN UTAMA -->
   <main class="container">
-
     <div id="status-box-container" class="hidden"></div>
 
     <div class="dashboard-actions">
@@ -41,6 +40,35 @@
       <!-- Postingan dimuat lewat JavaScript -->
     </div>
   </main>
+
+  <!-- MODAL LAPORKAN POSTINGAN -->
+  <div id="modal-report-post" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>⚠️ Laporkan Postingan</h2>
+      <form id="form-report-post">
+        <input type="hidden" id="report-post-id">
+        <div class="form-group">
+          <label for="report-reason">Alasan Pelaporan</label>
+          <select id="report-reason" required>
+            <option value="">-- Pilih Alasan --</option>
+            <option value="Konten Tidak Senonoh / Vulgar">Konten Tidak Senonoh / Vulgar</option>
+            <option value="Ujaran Kebencian / SARA / Bullying">Ujaran Kebencian / SARA / Bullying</option>
+            <option value="Informasi Palsu / Hoaks / Penipuan">Informasi Palsu / Hoaks / Penipuan</option>
+            <option value="Spam / Iklan Mengganggu">Spam / Iklan Mengganggu</option>
+            <option value="Pelanggaran Peraturan Pondok">Pelanggaran Peraturan Pondok</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="report-details">Catatan Tambahan (Opsional)</label>
+          <textarea id="report-details" rows="3" placeholder="Jelaskan secara singkat bagian mana yang melanggar..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-close-modal">Batal</button>
+          <button type="submit" class="btn" style="background-color: #ef4444; color: white; border: none;">Kirim Laporan</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- MODAL BUAT POSTINGAN -->
   <div id="modal-create-post" class="modal-overlay hidden">
@@ -61,12 +89,51 @@
           </select>
         </div>
         <div class="form-group">
+          <label for="post-image">Unggah Foto (Opsional)</label>
+          <input type="file" id="post-image" accept="image/*">
+        </div>
+        <div class="form-group">
           <label for="post-content">Isi Postingan</label>
-          <textarea id="post-content" rows="5" required placeholder="Tuliskan isi informasi di sini..."></textarea>
+          <textarea id="post-content" rows="4" required placeholder="Tuliskan isi informasi di sini..."></textarea>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline btn-close-modal">Batal</button>
           <button type="submit" class="btn btn-primary">Terbitkan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT POSTINGAN -->
+  <div id="modal-edit-post" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Edit Postingan</h2>
+      <form id="form-edit-post">
+        <input type="hidden" id="edit-post-id">
+        <div class="form-group">
+          <label for="edit-post-title">Judul Postingan</label>
+          <input type="text" id="edit-post-title" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-post-category">Kategori</label>
+          <select id="edit-post-category" required>
+            <option value="PENGUMUMAN">Pengumuman</option>
+            <option value="ARTIKEL">Artikel & Opini</option>
+            <option value="KARYA SANTRI">Karya Santri / Puisi</option>
+            <option value="KEGIATAN">Jadwal & Kegiatan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-post-image">Ganti Foto (Opsional)</label>
+          <input type="file" id="edit-post-image" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label for="edit-post-content">Isi Postingan</label>
+          <textarea id="edit-post-content" rows="4" required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-close-modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
         </div>
       </form>
     </div>
@@ -109,6 +176,40 @@
           <label for="reg-username">Username / ID Santri</label>
           <input type="text" id="reg-username" required placeholder="Buat username unik">
         </div>
+
+        <div class="form-group">
+          <label for="reg-tingkat">Tingkat Kelas</label>
+          <select id="reg-tingkat" required>
+            <option value="">-- Pilih Kelas --</option>
+            <option value="7">Kelas 7</option>
+            <option value="8">Kelas 8</option>
+            <option value="9">Kelas 9</option>
+            <option value="10">Kelas 10</option>
+            <option value="11">Kelas 11</option>
+            <option value="12">Kelas 12</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="group-jurusan">
+          <label for="reg-jurusan">Jurusan</label>
+          <select id="reg-jurusan">
+            <option value="IPA">IPA (MIPA)</option>
+            <option value="IPS">IPS (Social)</option>
+            <option value="IPK">IPK (Keagamaan)</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="group-subkelas">
+          <label for="reg-subkelas">Sub-Kelas / Rombel</label>
+          <select id="reg-subkelas">
+            <option value="A">Kelas A</option>
+            <option value="B">Kelas B</option>
+            <option value="C">Kelas C</option>
+            <option value="D">Kelas D</option>
+            <option value="E">Kelas E</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label for="reg-password">Password</label>
           <input type="password" id="reg-password" required placeholder="••••••••">
