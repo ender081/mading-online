@@ -43,7 +43,7 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
   else console.log("Database SQLite terhubung.");
 });
 
-// Inisialisasi Tabel
+// Inisialisasi Tabel Database
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
@@ -71,7 +71,6 @@ db.serialize(() => {
     )
   `);
 
-  // Tabel Likes
   db.run(`
     CREATE TABLE IF NOT EXISTS likes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,7 +81,6 @@ db.serialize(() => {
     )
   `);
 
-  // Tabel Laporan (Reports)
   db.run(`
     CREATE TABLE IF NOT EXISTS reports (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,12 +95,14 @@ db.serialize(() => {
     )
   `);
 
+  // Akun Admin Default
   db.get("SELECT * FROM users WHERE role = 'admin'", [], (err, row) => {
     if (!row) {
       const hash = bcrypt.hashSync("admin123", 10);
       db.run("INSERT INTO users (name, username, password, kelas, role, role_request) VALUES (?, ?, ?, ?, ?, ?)",
         ["Administrator Mading", "admin", hash, "Admin", "admin", "none"]
       );
+      console.log("-> Akun Admin Default dibuat: Username: admin / Password: admin123");
     }
   });
 });
@@ -175,7 +175,6 @@ app.post('/api/user/request-guru', (req, res) => {
 
 // --- API POSTINGAN MADING ---
 
-// Get Semua Postingan (dengan Hitungan Like & Status User Already Liked)
 app.get('/api/posts', (req, res) => {
   const currentUserId = req.session.user ? req.session.user.id : 0;
   const query = `
@@ -192,7 +191,6 @@ app.get('/api/posts', (req, res) => {
   });
 });
 
-// Toggle Like / Unlike Postingan
 app.post('/api/posts/:id/like', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ success: false, message: "Silakan login terlebih dahulu untuk menyukai postingan!" });
@@ -203,13 +201,11 @@ app.post('/api/posts/:id/like', (req, res) => {
 
   db.get("SELECT id FROM likes WHERE post_id = ? AND user_id = ?", [postId, userId], (err, row) => {
     if (row) {
-      // Jika sudah di-like, lakukan UNLIKE (hapus dari database)
       db.run("DELETE FROM likes WHERE post_id = ? AND user_id = ?", [postId, userId], (err) => {
         if (err) return res.status(500).json({ success: false, message: "Gagal memproses unlike." });
         res.json({ success: true, liked: false, message: "Batal menyukai postingan." });
       });
     } else {
-      // Jika belum di-like, tambahkan ke database
       db.run("INSERT INTO likes (post_id, user_id) VALUES (?, ?)", [postId, userId], (err) => {
         if (err) return res.status(500).json({ success: false, message: "Gagal memproses like." });
         res.json({ success: true, liked: true, message: "Menyukai postingan!" });
@@ -218,7 +214,6 @@ app.post('/api/posts/:id/like', (req, res) => {
   });
 });
 
-// Buat Postingan Baru
 app.post('/api/posts', upload.single('image'), (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ success: false, message: "Silakan login terlebih dahulu!" });
